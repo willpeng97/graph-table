@@ -1,25 +1,46 @@
-// 先初始化一個空圖表
 const ctx = $("#chartCanvas")[0].getContext("2d");
 let chart;
 
-// 更新圖表的函數
-function updateChart(chartType, timeRange) {
-	const data = fetchData(timeRange); // 模擬取得數據的函數
+// 文档加载完成后执行初始化
+$(document).ready(async function () {
+	initEventListeners(); // 初始化事件监听
+	const chartType = $("#chartType").val();
+	const timeRange = $("#timeRange").val();
+	await updateChart(chartType, timeRange); // 初始化图表
 
-	// 移除先前的圖表
+	// 每分钟刷新图表和表格的数据
+	setInterval(async () => {
+		const chartType = $("#chartType").val();
+		const timeRange = $("#timeRange").val();
+		await updateChart(chartType, timeRange);
+	}, 10000); // 60000 毫秒 = 1 分钟
+});
+
+// 加载 JSON 数据并返回
+async function fetchData(timeRange) {
+	const response = await fetch("chartData.json");
+	const data = await response.json();
+	return data[timeRange];
+}
+
+// 更新图表的函数
+async function updateChart(chartType, timeRange) {
+	const rawData = await fetchData(timeRange);
+	const labels = rawData.map((item) => item.label);
+	const values = rawData.map((item) => item.value);
+
 	if (chart) {
 		chart.destroy();
 	}
 
-	// 根據選擇的圖表類型建立新圖表
 	chart = new Chart(ctx, {
 		type: chartType,
 		data: {
-			labels: data.labels,
+			labels: labels,
 			datasets: [
 				{
-					label: "數據集",
-					data: data.values,
+					label: "数据集",
+					data: values,
 					backgroundColor: "rgba(75, 192, 192, 0.2)",
 					borderColor: "rgba(75, 192, 192, 1)",
 					borderWidth: 1,
@@ -39,60 +60,38 @@ function updateChart(chartType, timeRange) {
 					position: "bottom",
 				},
 			},
+			animation: false, // 停用動畫
 		},
+	});
+
+	updateTable(labels, values);
+}
+
+// 更新表格的函数
+function updateTable(labels, values) {
+	const tableBody = $("#gridTable tbody");
+	tableBody.empty();
+
+	labels.forEach((label, index) => {
+		const row = `<tr>
+					<td scope="col">${label}</td>
+            		<td scope="col">${values[index]}</td>
+                </tr>`;
+		tableBody.append(row);
 	});
 }
 
-// 模擬取得數據
-function fetchData(timeRange) {
-	const labels = [];
-	const values = [];
+// 初始化事件监听
+function initEventListeners() {
+	$("#chartType").on("change", function () {
+		const chartType = $(this).val();
+		const timeRange = $("#timeRange").val();
+		updateChart(chartType, timeRange);
+	});
 
-	switch (timeRange) {
-		case "week":
-			labels.push("周一", "周二", "周三", "周四", "周五", "周六", "周日");
-			values.push(10, 20, 30, 40, 50, 60, 70);
-			break;
-		case "month":
-			for (let i = 1; i <= 30; i++) {
-				labels.push(`Day ${i}`);
-				values.push(Math.floor(Math.random() * 100));
-			}
-			break;
-		case "year":
-			labels.push(
-				"1月",
-				"2月",
-				"3月",
-				"4月",
-				"5月",
-				"6月",
-				"7月",
-				"8月",
-				"9月",
-				"10月",
-				"11月",
-				"12月"
-			);
-			values.push(100, 150, 200, 130, 160, 190, 220, 140, 170, 200, 180, 210);
-			break;
-	}
-
-	return { labels, values };
+	$("#timeRange").on("change", function () {
+		const chartType = $("#chartType").val();
+		const timeRange = $(this).val();
+		updateChart(chartType, timeRange);
+	});
 }
-
-// 監聽下拉選單的變化
-$("#chartType").on("change", function () {
-	const chartType = $(this).val();
-	const timeRange = $("#timeRange").val();
-	updateChart(chartType, timeRange);
-});
-
-$("#timeRange").on("change", function () {
-	const chartType = $("#chartType").val();
-	const timeRange = $(this).val();
-	updateChart(chartType, timeRange);
-});
-
-// 初始化圖表
-updateChart("line", "week");

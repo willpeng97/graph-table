@@ -44,10 +44,10 @@
 						<div class="input-group w-75">
 							<span class="input-group-text fw-bold">間隔</span>
 							<select class="form-select shadow-none" id="timeRange">
-								<option value="week">周</option>
+								<option value="hour">時</option>
+								<option value="day">日</option>
+								<option value="week">週</option>
 								<option value="month">月</option>
-								<option value="year">年</option>
-								<!-- Add more options as needed -->
 							</select>
 						</div>
 					</div>
@@ -69,12 +69,16 @@
 								<button
 									type="button"
 									class="btn btn-outline-secondary shadow-none"
+									data-bs-target="#carouselExampleSlidesOnly"
+									data-bs-slide-to="0"
 								>
 									<i class="fa-solid fa-chart-line"></i>
 								</button>
 								<button
 									type="button"
 									class="btn btn-outline-secondary shadow-none"
+									data-bs-target="#carouselExampleSlidesOnly"
+									data-bs-slide-to="1"
 								>
 									<i class="fa-solid fa-table-list"></i>
 								</button>
@@ -97,16 +101,28 @@
 						</div>
 					</div>
 				</div>
+				<!-- 下方顯示區 -->
 				<div class="carousel-inner">
-					<div class="carousel-item active">
-						<!-- 下方圖表顯示區 -->
-						<div class="chart-display">
+					<div class="carousel-item display-content active">
+						<!-- chart圖 -->
+						<div class="chart-display h-100">
 							<canvas id="chartCanvas"></canvas>
 						</div>
 					</div>
-					<div class="carousel-item">
-						<div class="table-display">
-							<table></table>
+					<div class="carousel-item display-content">
+						<!-- 資料Table -->
+						<div class="table-display h-100 overflow-auto">
+							<table id="gridTable" class="table table-light">
+								<thead>
+									<tr>
+										<th scope="col">labels</th>
+										<th scope="col">values</th>
+									</tr>
+								</thead>
+								<tbody>
+									<!-- JS動態插入 -->
+								</tbody>
+							</table>
 						</div>
 					</div>
 				</div>
@@ -127,7 +143,13 @@
 	</script>
 	<script>
 		$(function () {
+			// 計算過去30天的日期
+			var startDate = moment().subtract(29, "days"); // 29天前
+			var endDate = moment(); // 當前日期
+
 			$("#dateRange").daterangepicker({
+				startDate: startDate, // 設置預設的開始日期
+				endDate: endDate, // 設置預設的結束日期
 				locale: {
 					format: "YYYY/MM/DD",
 					applyLabel: "確定",
