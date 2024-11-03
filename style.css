@@ -20,3 +20,11 @@
 #dateRange {
 	cursor: pointer;
 }
+
+.switchBtn {
+	border: 1px solid #a0a0a0 !important;
+}
+
+.switchBtn.selected {
+	background-color: #cfcfcf8b;
+}

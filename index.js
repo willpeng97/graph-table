@@ -4,15 +4,12 @@ let chart;
 // 文档加载完成后执行初始化
 $(document).ready(async function () {
 	initEventListeners(); // 初始化事件监听
-	const chartType = $("#chartType").val();
-	const timeRange = $("#timeRange").val();
-	await updateChart(chartType, timeRange); // 初始化图表
+	initDateRangePicker(); // 初始化日期選擇器
+	await updateChart(); // 初始化图表
 
 	// 每分钟刷新图表和表格的数据
 	setInterval(async () => {
-		const chartType = $("#chartType").val();
-		const timeRange = $("#timeRange").val();
-		await updateChart(chartType, timeRange);
+		await updateChart();
 	}, 10000); // 60000 毫秒 = 1 分钟
 });
 
@@ -24,7 +21,10 @@ async function fetchData(timeRange) {
 }
 
 // 更新图表的函数
-async function updateChart(chartType, timeRange) {
+async function updateChart() {
+	const chartType = $("#chartType").val();
+	const timeRange = $("#timeRange").val();
+
 	const rawData = await fetchData(timeRange);
 	const labels = rawData.map((item) => item.label);
 	const values = rawData.map((item) => item.value);
@@ -93,5 +93,58 @@ function initEventListeners() {
 		const chartType = $("#chartType").val();
 		const timeRange = $(this).val();
 		updateChart(chartType, timeRange);
+	});
+
+	$(".switchBtn").on("click", function () {
+		$(".switchBtn").removeClass("selected");
+		$(this).addClass("selected");
+	});
+}
+
+// 初始化日期選擇器
+function initDateRangePicker() {
+	// 計算過去30天的日期
+	var startDate = moment().subtract(29, "days"); // 29天前
+	var endDate = moment(); // 當前日期
+
+	$("#dateRange").daterangepicker({
+		startDate: startDate, // 設置預設的開始日期
+		endDate: endDate, // 設置預設的結束日期
+		locale: {
+			format: "YYYY/MM/DD",
+			applyLabel: "確定",
+			cancelLabel: "取消",
+			fromLabel: "開始日期",
+			toLabel: "結束日期",
+			customRangeLabel: "自訂日期區間",
+			daysOfWeek: ["日", "一", "二", "三", "四", "五", "六"],
+			monthNames: [
+				"1月",
+				"2月",
+				"3月",
+				"4月",
+				"5月",
+				"6月",
+				"7月",
+				"8月",
+				"9月",
+				"10月",
+				"11月",
+				"12月",
+			],
+			firstDay: 1,
+		},
+		ranges: {
+			今天: [moment(), moment()],
+			昨天: [moment().subtract(1, "days"), moment().subtract(1, "days")],
+			"過去 7 天": [moment().subtract(6, "days"), moment()],
+			"過去 30 天": [moment().subtract(29, "days"), moment()],
+			本月: [moment().startOf("month"), moment().endOf("month")],
+			上個月: [
+				moment().subtract(1, "month").startOf("month"),
+				moment().subtract(1, "month").endOf("month"),
+			],
+		},
+		alwaysShowCalendars: true,
 	});
 }
