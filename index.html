@@ -30,7 +30,7 @@
 							<option value="bar">柱狀圖</option>
 							<option value="pie">圓餅圖</option>
 						</select> -->
-						<div class="input-group w-75">
+						<div class="input-group">
 							<span class="input-group-text fw-bold">種類</span>
 							<select class="form-select shadow-none" id="chartType">
 								<option value="line">折線圖</option>
@@ -41,9 +41,9 @@
 						</div>
 					</div>
 					<div class="col-md-6 col-xl-3 mb-2">
-						<div class="input-group w-75">
+						<div class="input-group">
 							<span class="input-group-text fw-bold">間隔</span>
-							<select class="form-select shadow-none" id="timeRange">
+							<select class="form-select shadow-none" id="timePeriod">
 								<option value="hour">時</option>
 								<option value="day">日</option>
 								<option value="week">週</option>
@@ -52,7 +52,7 @@
 						</div>
 					</div>
 					<div class="col-md-8 col-xl-4 mb-2">
-						<div class="input-group">
+						<div class="input-group timePeriodPicker d-none">
 							<span class="input-group-text fw-bold">範圍</span>
 							<input
 								type="text"

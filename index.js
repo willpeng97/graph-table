@@ -8,24 +8,42 @@ $(document).ready(async function () {
 	await updateChart(); // 初始化图表
 
 	// 每分钟刷新图表和表格的数据
-	setInterval(async () => {
-		await updateChart();
-	}, 10000); // 60000 毫秒 = 1 分钟
+	// setInterval(async () => {
+	// 	await updateChart();
+	// }, 10000); // 60000 毫秒 = 1 分钟
 });
 
 // 加载 JSON 数据并返回
-async function fetchData(timeRange) {
+async function fetchData(timePeriod) {
 	const response = await fetch("chartData.json");
 	const data = await response.json();
-	return data[timeRange];
+	return data[timePeriod];
 }
 
 // 更新图表的函数
-async function updateChart() {
+async function updateChart(dateRange) {
 	const chartType = $("#chartType").val();
-	const timeRange = $("#timeRange").val();
+	const timePeriod = $("#timePeriod").val();
 
-	const rawData = await fetchData(timeRange);
+	if (timePeriod === "day") {
+		$(".timePeriodPicker").removeClass("d-none");
+	} else {
+		$(".timePeriodPicker").addClass("d-none");
+	}
+
+	let rawData = await fetchData(timePeriod);
+
+	if (dateRange) {
+		// 設定篩選的日期範圍，並轉換為 YY/MM/DD 格式
+		const startDate = dateRange.split(" - ")[0].slice(2); // 轉為 "24/01/11"
+		const endDate = dateRange.split(" - ")[1].slice(2); // 轉為 "24/01/27"
+
+		// 使用 filter 篩選符合範圍的日期
+		rawData = rawData.filter((item) => {
+			return item.label >= startDate && item.label <= endDate;
+		});
+	}
+
 	const labels = rawData.map((item) => item.label);
 	const values = rawData.map((item) => item.value);
 
@@ -84,20 +102,19 @@ function updateTable(labels, values) {
 // 初始化事件监听
 function initEventListeners() {
 	$("#chartType").on("change", function () {
-		const chartType = $(this).val();
-		const timeRange = $("#timeRange").val();
-		updateChart(chartType, timeRange);
+		updateChart();
 	});
 
-	$("#timeRange").on("change", function () {
-		const chartType = $("#chartType").val();
-		const timeRange = $(this).val();
-		updateChart(chartType, timeRange);
+	$("#timePeriod").on("change", function () {
+		updateChart();
 	});
 
 	$(".switchBtn").on("click", function () {
 		$(".switchBtn").removeClass("selected");
 		$(this).addClass("selected");
+	});
+	$("#dateRange").on("change", function () {
+		updateChart(this.value);
 	});
 }
 
